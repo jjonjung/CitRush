@@ -1,0 +1,27 @@
+Name,StepName,Description,ApiEndpointRowName,RequestTemplateRowName,MockResponseSampleRowName,DelayBeforeExecutionSeconds,bForceMockMode,bContinueOnFailure,bEnabled
+Step_EarlyGame_01,"매치 시작","초반전 시나리오 - 매치 시작 API 호출",MatchStart_V1_2,Req_MatchStart_Normal,Res_MatchStart_Success,0.0,false,false,true
+Step_EarlyGame_02,"AI 의사결정 #1","초반전 - 적 탐색 중, 안전한 상태",GetDecision_V1_2,Req_GetDecision_EarlyGameSafe,Res_GetDecision_EarlyPatrol,3.0,false,true,true
+Step_EarlyGame_03,"AI 의사결정 #2","초반전 - 적 발견, 경계 태세",GetDecision_V1_2,Req_GetDecision_EarlyGameAlert,Res_GetDecision_EarlyAlert,3.0,false,true,true
+Step_MidGame_01,"AI 의사결정 #3","중반전 - Driver1 추격당함",GetDecision_V1_2,Req_GetDecision_MidGameChase,Res_GetDecision_MidChase,0.0,false,true,true
+Step_MidGame_02,"Overseer TTS #1","중반전 - 체력 낮음 경고",OverseerTTS_V1_2,Req_OverseerTTS_LowHealth,Res_OverseerTTS_Warning,1.0,false,true,true
+Step_MidGame_03,"AI 의사결정 #4","중반전 - 회피 기동",GetDecision_V1_2,Req_GetDecision_MidGameEvade,Res_GetDecision_MidEvade,3.0,false,true,true
+Step_MidGame_04,"AI 의사결정 #5","중반전 - 안전 지역 도착",GetDecision_V1_2,Req_GetDecision_MidGameSafe,Res_GetDecision_MidSafe,3.0,false,true,true
+Step_LateGame_01,"AI 의사결정 #6","후반전 - 적 체력 낮음 확인",GetDecision_V1_2,Req_GetDecision_LateGameWeakEnemy,Res_GetDecision_LateWeakEnemy,0.0,false,true,true
+Step_LateGame_02,"AI 의사결정 #7","후반전 - 최종 공격 개시",GetDecision_V1_2,Req_GetDecision_LateGameAttack,Res_GetDecision_LateAttack,3.0,false,true,true
+Step_LateGame_03,"매치 종료","후반전 - 매치 종료 (승리)",MatchEnd_V1_2,Req_MatchEnd_Victory,Res_MatchEnd_Victory,2.0,false,false,true
+Step_LateGame_04,"지휘관 리포트","후반전 - 지휘관 성적 조회",CommanderReport_V1_2,Req_CommanderReport,Res_CommanderReport_GradeA,1.0,false,true,true
+Step_Full_01,"[전체] 매치 시작","전체 매치 - 시작",MatchStart_V1_2,Req_MatchStart_Normal,Res_MatchStart_Success,0.0,false,false,true
+Step_Full_02,"[전체] 초반 탐색","전체 매치 - 초반 적 탐색",GetDecision_V1_2,Req_GetDecision_EarlyGameSafe,Res_GetDecision_EarlyPatrol,3.0,false,true,true
+Step_Full_03,"[전체] 적 발견","전체 매치 - 적 발견",GetDecision_V1_2,Req_GetDecision_EarlyGameAlert,Res_GetDecision_EarlyAlert,3.0,false,true,true
+Step_Full_04,"[전체] 중반 추격","전체 매치 - 중반 추격전",GetDecision_V1_2,Req_GetDecision_MidGameChase,Res_GetDecision_MidChase,3.0,false,true,true
+Step_Full_05,"[전체] TTS 경고","전체 매치 - 체력 경고",OverseerTTS_V1_2,Req_OverseerTTS_LowHealth,Res_OverseerTTS_Warning,1.0,false,true,true
+Step_Full_06,"[전체] 회피 성공","전체 매치 - 회피 성공",GetDecision_V1_2,Req_GetDecision_MidGameEvade,Res_GetDecision_MidEvade,3.0,false,true,true
+Step_Full_07,"[전체] 최종 공격","전체 매치 - 최종 공격",GetDecision_V1_2,Req_GetDecision_LateGameAttack,Res_GetDecision_LateAttack,3.0,false,true,true
+Step_Full_08,"[전체] 승리","전체 매치 - 승리",MatchEnd_V1_2,Req_MatchEnd_Victory,Res_MatchEnd_Victory,2.0,false,false,true
+Step_Full_09,"[전체] 리포트","전체 매치 - 리포트",CommanderReport_V1_2,Req_CommanderReport,Res_CommanderReport_GradeA,1.0,false,true,true
+Step_Defeat_01,"[패배] 매치 시작","패배 시나리오 - 시작",MatchStart_V1_2,Req_MatchStart_Normal,Res_MatchStart_Success,0.0,false,false,true
+Step_Defeat_02,"[패배] 압도당함","패배 시나리오 - 적에게 압도",GetDecision_V1_2,Req_GetDecision_Overwhelmed,Res_GetDecision_Overwhelmed,3.0,false,true,true
+Step_Defeat_03,"[패배] 패배","패배 시나리오 - 패배",MatchEnd_V1_2,Req_MatchEnd_Defeat,Res_MatchEnd_Defeat,2.0,false,false,true
+Step_Mock_01,"[Mock] 시작","Mock 전용 - 시작",MatchStart_V1_2,Req_MatchStart_Normal,Res_MatchStart_Success,0.0,true,false,true
+Step_Mock_02,"[Mock] AI 결정","Mock 전용 - AI 결정",GetDecision_V1_2,Req_GetDecision_EarlyGameSafe,Res_GetDecision_EarlyPatrol,2.0,true,true,true
+Step_Mock_03,"[Mock] 종료","Mock 전용 - 종료",MatchEnd_V1_2,Req_MatchEnd_Victory,Res_MatchEnd_Victory,2.0,true,false,true

@@ -1,0 +1,7 @@
+Name,ScenarioName,Description,GamePhase,ExpectedDurationSeconds,Difficulty,StepRowNames,bEnabled,Tags
+Scenario_EarlyGameNormal,"초반전 - 정상 진행","매치 시작 후 적 탐색 단계. 모든 플레이어 안전한 상태.",EARLY_GAME,90.0,NORMAL,"(Step_EarlyGame_01,Step_EarlyGame_02,Step_EarlyGame_03)",true,"(EarlyGame,Normal,Safe)"
+Scenario_MidGameCrisis,"중반전 - 위기 상황","적이 Driver1을 추격. 체력 낮음 경고 발생.",MID_GAME,60.0,HARD,"(Step_MidGame_01,Step_MidGame_02,Step_MidGame_03,Step_MidGame_04)",true,"(MidGame,Crisis,LowHealth)"
+Scenario_LateGameVictory,"후반전 - 승리","적 체력 낮음. 마지막 공격으로 승리.",LATE_GAME,45.0,NORMAL,"(Step_LateGame_01,Step_LateGame_02,Step_LateGame_03,Step_LateGame_04)",true,"(LateGame,Victory,Success)"
+Scenario_FullMatch,"전체 매치 - 정상 승리","매치 시작부터 종료까지 전체 플레이 흐름. 초반→중반→후반→승리",FULL_MATCH,300.0,NORMAL,"(Step_Full_01,Step_Full_02,Step_Full_03,Step_Full_04,Step_Full_05,Step_Full_06,Step_Full_07,Step_Full_08,Step_Full_09)",true,"(FullMatch,Victory,Complete)"
+Scenario_QuickDefeat,"빠른 패배 시나리오","초반에 플레이어들이 빠르게 제압당함. 테스트용.",EARLY_GAME,30.0,HARD,"(Step_Defeat_01,Step_Defeat_02,Step_Defeat_03)",true,"(Defeat,Test,Quick)"
+Scenario_MockOnly,"Mock 전용 테스트","AI 서버 없이 완전 Mock 데이터로만 진행. 오프라인 테스트용.",EARLY_GAME,60.0,EASY,"(Step_Mock_01,Step_Mock_02,Step_Mock_03)",true,"(Mock,Offline,Test)"

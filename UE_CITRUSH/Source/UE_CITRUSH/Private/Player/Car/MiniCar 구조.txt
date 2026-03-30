@@ -1,0 +1,126 @@
+﻿ 1. 서스펜션 (Suspension)
+
+  F_spring = k * x  (Hooke's Law)
+  F_damping = c * v (Damping)
+  F_total = F_spring - F_damping
+  - k: SpringStiffness (N/m) = 50000
+  - c: SpringDamping (Ns/m) = 3000
+  - x: 압축 거리 (m)
+  - v: 수직 속도 (m/s)
+
+  2. 타이어 모델 (Pacejka Tire Model)
+
+  종방향 힘 (가속/브레이크):
+  SlipRatio = (WheelSpeed - VehicleSpeed) / |VehicleSpeed|
+  F_long = Sin(SlipRatio / 0.15 * π/2) * MaxLongitudinalForce
+
+  횡방향 힘 (코너링):
+  SlipAngle = atan2(LateralVelocity, LongitudinalVelocity)
+  F_lat = -Sin(SlipAngle / 0.2 * π/2) * MaxLateralForce
+
+  3. 공기 저항 (Aerodynamics)
+
+  F_drag = 0.5 * ρ * Cd * A * v²
+  - ρ: 공기 밀도 = 1.225 kg/m³
+  - Cd: 항력 계수 = 0.32
+  - A: 전면 면적 = 2.3 m²
+  - v: 속도 (m/s)
+
+  4. 바퀴 회전
+
+  ω = v / r  (각속도 = 선속도 / 반지름)
+
+  핵심 구조 변경점
+
+  Before (Component 사용)
+
+  AMiniCooper
+    └─ UCustomVehicleMovementComponent (ActorComponent)
+        └─ TickComponent()에서 물리 계산
+
+  After (Component 없이 직접 구현)
+
+  AMiniCooper (APawn)
+    └─ Tick()에서 직접 물리 계산
+        ├─ ApplySuspensionForces()
+        ├─ ApplyDriveForces()
+        ├─ ApplyAerodynamicForces()
+        └─ UpdateWheelRotations()
+
+  Blueprint 설정 방법
+
+  1. Input Actions 할당
+
+  VehicleDemoCejCar와 동일한 Input Actions 사용:
+  - SteeringAction
+  - ThrottleAction
+  - BrakeAction
+  - ResetVehicleAction
+
+  2. 필수 설정
+
+  - VehicleMesh: Skeletal Mesh 할당
+  - Simulate Physics: ✅ 체크 (매우 중요!)
+  - Collision Profile: Vehicle
+  - Mass: 1200 kg (자동 설정됨)
+
+  3. 파라미터 튜닝
+
+  Suspension (서스펜션):
+  - Spring Stiffness: 50000 N/m (스프링 강성)
+  - Spring Damping: 3000 Ns/m (댐핑)
+  - Max Suspension Length: 30 cm
+  - Suspension Rest Length: 20 cm
+
+  Engine (엔진):
+  - Max Torque: 1000 Nm
+  - Brake Torque: 3000 Nm
+  - Max RPM: 7000
+  - Idle RPM: 900
+
+  Steering (조향):
+  - Max Steering Angle: 30도
+  - Steering Speed: 2.5 (조향 반응 속도)
+
+  Tire Model (타이어):
+  - Tire Grip Multiplier: 1.0 (그립 배율)
+  - Max Longitudinal Force: 6000 N
+  - Max Lateral Force: 8000 N
+
+  Aerodynamics (공기역학):
+  - Drag Coefficient: 0.32
+  - Frontal Area: 2.3 m²
+  - Downforce Coefficient: 0.0 (일반 차량)
+
+  4. 디버그 모드
+
+  - Show Debug Lines: ✅ 체크하면 서스펜션 Raycast와 힘 벡터를 시각화
+
+  5. Pacejka Curve (선택 사항)
+
+  더 정교한 타이어 모델을 원한다면 Curve Float Asset 생성:
+
+  Longitudinal Force Curve:
+  - (-1.0, -0.8)
+  - (-0.2, -1.0) ← 최대 브레이크 그립
+  - (0.0, 0.0)
+  - (0.15, 1.0) ← 최대 가속 그립
+  - (1.0, 0.6)
+
+  Lateral Force Curve:
+  - (-0.3, -1.0)
+  - (0.0, 0.0)
+  - (0.3, 1.0)
+
+//정리
+  1. 간단한 구조: Component 없이 모든 로직이 AMiniCooper 안에 있음
+  2. 직접 제어: 물리 공식을 직접 코드에서 확인하고 수정 가능
+  3. 성능: Component 오버헤드 없음
+  4. 교육적: 차량 물리의 원리를 명확하게 이해할 수 있음
+  5. 유연성: 필요에 따라 공식을 쉽게 수정 가능
+//테스트 방법
+  1. 언리얼 에디터에서 BP_MiniCooper Blueprint 생성
+  2. Vehicle Mesh 설정 및 Simulate Physics 활성화
+  3. Input Actions 할당
+  4. 레벨에 배치 후 Play
+  5. VehicleDemoCejCar와 동일한 키로 조작

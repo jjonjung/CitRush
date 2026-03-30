@@ -1,0 +1,5 @@
+Name,BaseDamage,InvulnerabilityDuration,PPelletCooldownDuration,AIRequestInterval,SpringArmLength,CameraZOffset
+Default,34.0,2.0,30.0,5.0,600.0,100.0
+Easy,25.0,2.5,25.0,6.0,700.0,120.0
+Hard,40.0,1.5,35.0,4.0,500.0,80.0
+VeryHard,50.0,1.0,40.0,3.0,400.0,60.0

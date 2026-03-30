@@ -1,0 +1,293 @@
+ 1. 개요
+
+  USideBrakeComponent는 드리프트를 위한 전문적인 사이드 브레이크 시스템입니다. 일반 브레이크와 달리 후륜만
+  제동하여 차량의 드리프트를 유도합니다.
+
+  ---
+  2. 핵심 설계 철학
+
+  일반 브레이크 (4륜 제동)  →  차량 정지
+  사이드 브레이크 (후륜만)  →  차량 회전 (드리프트)
+
+  왜 후륜만 잠그는가?
+
+  | 방식    | 결과               | 용도        |
+  |-------|------------------|-----------|
+  | 전륜 잠금 | 조향 불가, 직진 제동     | ❌ 드리프트 불가 |
+  | 후륜 잠금 | 후륜 슬립 + 전륜 조향 가능 | ✅ 드리프트 최적 |
+  | 4륜 잠금 | 차량 정지            | 일반 브레이크   |
+
+  ---
+  3. 주요 파라미터
+
+  // 1. 후륜 핸드브레이크 토크
+  float HandbrakeTorque = 5500.0f;  // Nm (뉴턴미터)
+  // 스포츠카 기준 강력한 제동력
+
+  // 2. 드리프트 마찰 감소
+  bool bReduceRearFrictionOnBrake = true;
+  float DriftFrictionMultiplier = 0.6f;  // 원래의 60%로 감소
+
+  // 3. 엔진 토크 차단
+  bool bCutThrottleOnBrake = true;  // (현재 주석 처리됨)
+
+  ---
+  4. 초기화 과정 (BeginPlay)
+
+  ┌─────────────────────────────────────────────────┐
+  │ 1. FindVehicleMovement()                        │
+  │    └─ UChaosWheeledVehicleMovementComponent 찾기│
+  └─────────────────────────────────────────────────┘
+                        ↓
+  ┌─────────────────────────────────────────────────┐
+  │ 2. InitializeHandbrakeSettings()                │
+  │    ├─ 후륜 핸드브레이크 토크 설정               │
+  │    ├─ 전륜 핸드브레이크 비활성화                │
+  │    ├─ 후륜 핸드브레이크 활성화                  │
+  │    └─ 원래 마찰 계수 저장                       │
+  └─────────────────────────────────────────────────┘
+
+  InitializeHandbrakeSettings() 상세
+
+  void USideBrakeComponent::InitializeHandbrakeSettings()
+  {
+      // 1. 후륜에만 강력한 핸드브레이크 토크 설정
+      VehicleMovement->SetWheelHandbrakeTorque(2, 5500.0f);  // 좌측 후륜 (인덱스 2)
+      VehicleMovement->SetWheelHandbrakeTorque(3, 5500.0f);  // 우측 후륜 (인덱스 3)
+
+      // 2. 전륜은 핸드브레이크 영향 받지 않도록
+      VehicleMovement->SetAffectedByHandbrake(0, false);  // 좌측 전륜
+      VehicleMovement->SetAffectedByHandbrake(1, false);  // 우측 전륜
+
+      // 3. 후륜만 핸드브레이크 영향 받도록
+      VehicleMovement->SetAffectedByHandbrake(2, true);   // 좌측 후륜
+      VehicleMovement->SetAffectedByHandbrake(3, true);   // 우측 후륜
+
+      // 4. 원래 마찰 계수 저장 (나중에 복원용)
+      OriginalRearLeftFriction = 1.0f;
+      OriginalRearRightFriction = 1.0f;
+  }
+
+  바퀴 인덱스 배치:
+        [0]────────────[1]    전륜 (Front)
+         │              │
+         │   차량 본체   │
+         │              │
+        [2]────────────[3]    후륜 (Rear)
+
+  ---
+  5. 사이드 브레이크 작동 메커니즘
+
+  SetSideBrakeApplied(bool bApplied) 플로우
+
+  사용자 입력 (키 Press)
+          ↓
+  SetSideBrakeApplied(true)
+          ↓
+  ┌─────────────────────────────────────────┐
+  │ 1. 중복 호출 방지 체크                  │
+  │    if (bIsSideBrakeApplied == bApplied) │
+  │        return;                           │
+  └─────────────────────────────────────────┘
+          ↓
+  ┌─────────────────────────────────────────┐
+  │ 2. Chaos Vehicle 핸드브레이크 입력 설정 │
+  │    VehicleMovement->SetHandbrakeInput(true)│
+  └─────────────────────────────────────────┘
+          ↓
+  ┌─────────────────────────────────────────┐
+  │ 3. 스로틀 입력 유지                     │
+  │    VehicleMovement->SetThrottleInput(   │
+  │        CurrentThrottleInput)            │
+  └─────────────────────────────────────────┘
+          ↓
+  ┌─────────────────────────────────────────┐
+  │ 4. 후륜 마찰 감소 (드리프트 유도)      │
+  │    AdjustRearFriction(true)             │
+  │    - 좌측 후륜 마찰: 0.6x               │
+  │    - 우측 후륜 마찰: 0.6x               │
+  └─────────────────────────────────────────┘
+          ↓
+  ┌─────────────────────────────────────────┐
+  │ 결과: 후륜 슬립 + 전륜 조향 가능        │
+  │       → 드리프트 발생                   │
+  └─────────────────────────────────────────┘
+
+  ---
+  6. 후륜 마찰 조정 메커니즘 (AdjustRearFriction)
+
+  드리프트 모드 (bReduce = true)
+
+  void USideBrakeComponent::AdjustRearFriction(bool bReduce)
+  {
+      if (bReduce)  // 사이드 브레이크 ON
+      {
+          // 후륜 마찰 60%로 감소
+          VehicleMovement->SetWheelFrictionMultiplier(2, 0.6f);  // 좌측 후륜
+          VehicleMovement->SetWheelFrictionMultiplier(3, 0.6f);  // 우측 후륜
+
+          // 스로틀 유지 (엔진 토크 계속 전달)
+          VehicleMovement->SetThrottleInput(CurrentThrottleInput);
+      }
+      else  // 사이드 브레이크 OFF
+      {
+          // 원래 마찰 계수로 복원
+          VehicleMovement->SetWheelFrictionMultiplier(2, 1.0f);
+          VehicleMovement->SetWheelFrictionMultiplier(3, 1.0f);
+      }
+  }
+
+  마찰 감소의 효과
+
+  정상 상태 (마찰 1.0):
+  ┌─────┐
+  │ 후륜 │ ────> 그립력 100% → 차량 안정적
+  └─────┘
+
+  드리프트 모드 (마찰 0.6):
+  ┌─────┐
+  │ 후륜 │ ≈≈≈> 그립력  60% → 후륜 슬립 발생
+  └─────┘        └─ 브레이크 토크 + 엔진 토크
+                    → 회전력(Yaw) 증가
+
+  ---
+  7. 물리적 작동 원리
+
+  드리프트 발생 메커니즘
+
+  1. 사이드 브레이크 활성화
+     ↓
+  2. 후륜에 강력한 제동 토크 (5500 Nm)
+     └─ 후륜 회전 속도 감소
+     ↓
+  3. 동시에 후륜 마찰 감소 (0.6x)
+     └─ 후륜 그립력 약화
+     ↓
+  4. 스로틀 엔진 토크 입력 유지
+     └─가 후륜에 계속 전달
+     ↓
+  5. 결과:
+     ┌────────────────────────────────┐
+     │ 후륜 = 브레이크 토크 + 엔진 토크│
+     │        + 마찰 감소              │
+     │        = 슬립 발생              │
+     └────────────────────────────────┘
+     ↓
+  6. 전륜은 조향 가능 + 핸드브레이크 영향 없음
+     └─ 운전자가 원하는 방향으로 차량 회전
+
+  힘의 관계
+
+  정상 주행:
+        ↑ 전륜 (조향 + 구동)
+        │
+  차량──┼──> 전진
+        │
+        ↑ 후륜 (구동)
+
+  드리프트 (사이드 브레이크):
+        ↑ 전륜 (조향 가능)
+        │
+  차량──┼──> 회전
+        │
+        ≈ 후륜 (잠김 + 슬립)
+          └─ 브레이크(5500Nm) + 엔진토크 + 마찰감소(0.6x)
+
+  ---
+  8. 주요 특징
+
+  ✅ Component 기반 설계
+
+  PrimaryComponentTick.bCanEverTick = false;  // Tick 사용 안 함
+  - Event-driven 방식
+  - 성능 최적화
+
+  ✅ 차량 독립성
+
+  VehicleMovement = OwnerPawn->FindComponentByClass<UChaosWheeledVehicleMovementComponent>();
+  - 어떤 Chaos Vehicle에도 부착 가능
+  - 재사용성 높음
+
+  ✅ 실시간 조정 가능
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SideBrake")
+  float HandbrakeTorque = 5500.0f;
+  - 런타임에 파라미터 조정 가능
+  - 차량 특성에 맞게 튜닝 가능
+
+  ---
+  9. 엔진 토크 차단 (현재 비활성화)
+
+  // 현재 주석 처리됨 (85~92줄)
+  /*if (bCutThrottleOnBrake)
+  {
+      if (bApplied)
+      {
+          VehicleMovement->SetThrottleInput(0.0f);  // 엔진 토크 차단
+      }
+  }*/
+
+  주석 처리된 이유 추측:
+
+  | 토크 차단 ON | 토크 차단 OFF (현재) |
+  |----------|----------------|
+  | 후륜 완전 잠김 | 후륜 슬립 유지       |
+  | 드리프트 짧음  | 드리프트 길게 유지 가능  |
+  | 제동 중심    | 파워 드리프트        |
+
+  현재 구현은 "파워 드리프트" 스타일입니다.
+
+  ---
+  10. 실제 사용 예시
+
+  // 플레이어 입력 처리
+  void AMyRacer::OnSideBrakePressed()
+  {
+      if (SideBrakeComponent)
+      {
+          SideBrakeComponent->SetSideBrakeApplied(true);
+      }
+  }
+
+  void AMyRacer::OnSideBrakeReleased()
+  {
+      if (SideBrakeComponent)
+      {
+          SideBrakeComponent->SetSideBrakeApplied(false);
+      }
+  }
+
+  ---
+  11. 설계상 주목할 점
+
+  코드 73줄 주석
+
+  //Chaos Vehicle에서는 각 휠별로 구동력(Drive Torque)과 브레이크 토크를 설정 가능?
+  → Chaos Vehicle의 강력한 기능 활용
+
+  코드 100~106줄 주석 (전륜 잠금에 대한 설명)
+
+  /*전륜만 잠그고 싶을 때
+  논리적으로는 WheelSetup에서 전륜 휠만 AffectedByHandbrake = true로 설정하면 됨
+  문제는 전륜만 잠그면 후륜은 구동력 때문에 계속 굴러감
+  → 차량이 회전하지 않고 그냥 브레이크 느낌
+  드리프트용으로는 "후륜만 잠금"이 더 자연스러움
+  */
+  → 후륜 잠금이 드리프트에 최적인 이유를 명확히 설명
+
+  ---
+  12. 요약
+
+  SideBrakeComponent는 다음 3가지 메커니즘을 조합하여 드리프트를 구현합니다:
+
+  1. 후륜 강력한 제동 (5500 Nm)
+  2. 후륜 마찰 감소 (60%)
+  3. 엔진 토크 유지 (CurrentThrottleInput)
+
+
+
+
+제로백 높이고 
+최대속도 제한
+브레이크 마찰 확 잠기게
+차량 더 무거운 느낌 

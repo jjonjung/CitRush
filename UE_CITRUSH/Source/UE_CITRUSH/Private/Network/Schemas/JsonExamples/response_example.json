@@ -1,0 +1,18 @@
+{
+  "method": "POST",
+  "status": "success",
+  "received": {
+    "test_message": "Hello from Unreal Engine",
+    "test_number": 42,
+    "test_array": [
+      "item1",
+      "item2",
+      "item3"
+    ],
+    "test_object": {
+      "nested_field": "nested_value",
+      "nested_number": 123.45
+    }
+  },
+  "timestamp": "2025-11-10T20:30:00.123456"
+}

@@ -1,0 +1,5 @@
+---,ID,icon,racerIcon,tag,itemData
+Boost,"Boost","/Script/Engine.Texture2D'/Game/CITRUSH/Commender/Tex/Bomb.Bomb'","/Script/Engine.Texture2D'/Game/CITRUSH/Commender/Tex/Racer_Blue.Racer_Blue'","(TagName=""Racer.Ability.Boost"")","/Script/UE_CITRUSH.ItemData'/Game/CITRUSH/Item/DA_Boost.DA_Boost'"
+NewRow,"ReFuel","/Script/Engine.Texture2D'/Game/CITRUSH/UI/Images/logo_Inline.logo_Inline'","/Script/Engine.Texture2D'/Game/CITRUSH/Commender/Tex/Racer_Blue.Racer_Blue'","(TagName="""")","/Script/UE_CITRUSH.ItemData'/Game/CITRUSH/Item/DA_ReFuel.DA_ReFuel'"
+NewRow_0,"Heal","/Script/Engine.Texture2D'/Game/CITRUSH/Characters/Mannequin_UE4/Textures/T_UELogo_Mask.T_UELogo_Mask'","/Script/Engine.Texture2D'/Game/CITRUSH/Commender/Tex/Racer_Blue.Racer_Blue'","(TagName=""Commander"")","/Script/UE_CITRUSH.ItemData'/Game/CITRUSH/Item/DA_Heal.DA_Heal'"
+NewRow_1,"Shield","/Script/Engine.Texture2D'/Game/CITRUSH/UI/Lobby/LobbyPixel.LobbyPixel'","/Script/Engine.Texture2D'/Game/CITRUSH/Commender/Tex/Racer_Blue.Racer_Blue'","(TagName="""")","/Script/UE_CITRUSH.ItemData'/Game/CITRUSH/Item/DA_Shield.DA_Shield'"
